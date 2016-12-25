@@ -1,4 +1,4 @@
-package calebpaul.quietpocket;
+package calebpaul.quietpocket.ui;
 
 import android.Manifest;
 import android.app.PendingIntent;
@@ -42,6 +42,9 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import calebpaul.quietpocket.services.GeofenceTransitionService;
+import calebpaul.quietpocket.R;
 
 public class MainActivity extends AppCompatActivity
         implements
