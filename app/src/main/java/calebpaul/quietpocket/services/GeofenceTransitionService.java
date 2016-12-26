@@ -21,6 +21,7 @@ import java.util.List;
 
 import calebpaul.quietpocket.R;
 import calebpaul.quietpocket.ui.MainActivity;
+import io.realm.Realm;
 
 
 public class GeofenceTransitionService extends IntentService {
@@ -32,6 +33,8 @@ public class GeofenceTransitionService extends IntentService {
     public GeofenceTransitionService() {
         super(TAG);
     }
+
+    private Realm realm;
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -61,6 +64,9 @@ public class GeofenceTransitionService extends IntentService {
     private String getGeofenceTrasitionDetails(int geoFenceTransition, List<Geofence> triggeringGeofences) {
         // get the ID of each geofence triggered
         AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+//        Create Realm Instance
+        realm = Realm.getDefaultInstance();
 
         ArrayList<String> triggeringGeofencesList = new ArrayList<>();
         for ( Geofence geofence : triggeringGeofences ) {
@@ -107,7 +113,6 @@ public class GeofenceTransitionService extends IntentService {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
         notificationBuilder
                 .setSmallIcon(R.drawable.smartphone)
-//                .setColor(Color.GREEN)
                 .setContentTitle(msg)
                 .setContentText("Your Pocket is Quiet! Shhh!")
                 .setContentIntent(notificationPendingIntent)

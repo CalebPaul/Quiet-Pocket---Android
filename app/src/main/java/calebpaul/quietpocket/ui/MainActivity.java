@@ -43,8 +43,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import calebpaul.quietpocket.services.GeofenceTransitionService;
 import calebpaul.quietpocket.R;
+import calebpaul.quietpocket.services.GeofenceTransitionService;
 
 public class MainActivity extends AppCompatActivity
         implements
@@ -57,12 +57,12 @@ public class MainActivity extends AppCompatActivity
         ResultCallback<Status> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-
     private GoogleMap map;
     private GoogleApiClient googleApiClient;
     private Location lastLocation;
     private TextView textLat, textLong;
     private MapFragment mapFragment;
+
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
     // Create a Intent send by the notification
