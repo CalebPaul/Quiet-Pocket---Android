@@ -7,7 +7,9 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,6 +27,9 @@ public class GeofenceTransitionService extends IntentService {
     private static final String TAG = GeofenceTransitionService.class.getSimpleName();
 
     public static final int GEOFENCE_NOTIFICATION_ID = 0;
+
+    private SharedPreferences mSharedPref;
+    private SharedPreferences.Editor mSharedPrefEditor;
 
     public GeofenceTransitionService() {
         super(TAG);
@@ -46,18 +51,21 @@ public class GeofenceTransitionService extends IntentService {
                 geoFenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT ) {
             // Get the geofence that were triggered
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-
-            String geofenceTransitionDetails = getGeofenceTrasitionDetails(geoFenceTransition, triggeringGeofences );
-
+            String geofenceTransitionDetails = getGeofenceTransitionDetails(geoFenceTransition, triggeringGeofences );
             // Send notification details as a String
             sendNotification( geofenceTransitionDetails );
         }
     }
 
 
-    private String getGeofenceTrasitionDetails(int geoFenceTransition, List<Geofence> triggeringGeofences) {
+    private String getGeofenceTransitionDetails(int geoFenceTransition, List<Geofence> triggeringGeofences) {
         // get the ID of each geofence triggered
         AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mSharedPrefEditor = mSharedPref.edit();
+
+        //TODO Set phone silent, run debug. Value should be 0.
 
         ArrayList<String> triggeringGeofencesList = new ArrayList<>();
         for ( Geofence geofence : triggeringGeofences ) {
@@ -67,13 +75,24 @@ public class GeofenceTransitionService extends IntentService {
         String status = null;
         if ( geoFenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ) {
             status = "Entering ";
+            int ringerMode = audio.getRingerMode();
+            addToSharedPreferences(ringerMode);
+            //SAVE RINGER MODE TO CONSTANTS HERE.
             audio.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
         } else if ( geoFenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT ) {
-            audio.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+
+            int previousRingerMode = mSharedPref.getInt(String.valueOf(Constants.DEFAULT_RINGER_MODE), AudioManager.RINGER_MODE_NORMAL);
+
+//            audio.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            audio.setRingerMode(previousRingerMode);
             status = "Exiting ";
 
         }
         return status + TextUtils.join( ", ", triggeringGeofencesList);
+    }
+
+    private void addToSharedPreferences(int ringerMode) {
+        mSharedPrefEditor.putInt(String.valueOf(Constants.DEFAULT_RINGER_MODE), ringerMode).apply();
     }
 
     private void sendNotification( String msg ) {
