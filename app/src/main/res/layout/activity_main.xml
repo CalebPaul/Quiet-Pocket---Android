@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="calebpaul.quietpocket.MainActivity">
+    tools:context="calebpaul.quietpocket.ui.MainActivity">
 
     <!-- Line with Latitude and Longitude -->
     <LinearLayout

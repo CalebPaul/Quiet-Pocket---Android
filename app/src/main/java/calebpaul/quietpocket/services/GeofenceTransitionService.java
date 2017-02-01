@@ -1,4 +1,4 @@
-package calebpaul.quietpocket;
+package calebpaul.quietpocket.services;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -18,6 +18,9 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import calebpaul.quietpocket.R;
+import calebpaul.quietpocket.ui.MainActivity;
 
 
 public class GeofenceTransitionService extends IntentService {

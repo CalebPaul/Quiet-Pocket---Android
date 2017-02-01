@@ -1,4 +1,4 @@
-package calebpaul.quietpocket;
+package calebpaul.quietpocket.ui;
 
 import android.Manifest;
 import android.app.PendingIntent;
@@ -42,6 +42,11 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import calebpaul.quietpocket.services.GeofenceTransitionService;
+import calebpaul.quietpocket.R;
+
+import static calebpaul.quietpocket.R.id.geofence;
 
 public class MainActivity extends AppCompatActivity
         implements
@@ -121,7 +126,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch ( item.getItemId() ) {
-            case R.id.geofence: {
+            case geofence: {
                 startGeofence();
                 return true;
             }
@@ -347,7 +352,8 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private static final long GEO_DURATION = 60 * 60 * 1000; // 1 HR??
+//    private static final long GEO_DURATION = 60 * 60 * 1000; // 1 HR??
+    private static final long GEO_DURATION = Geofence.NEVER_EXPIRE; // 1 HR??
     private static final long GEO_LOITER = 15 * 1000;
     private static final String GEOFENCE_REQ_ID = "My Geofence";
     private static final float GEOFENCE_RADIUS = 15.0f; // in meters
