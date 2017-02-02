@@ -17,6 +17,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    buildTypes.each {
+        it.buildConfigField 'String', 'GOOGLE_PLACES_API_KEY', GooglePlacesAPIKey;
+    }
 }
 
 dependencies {
@@ -24,4 +28,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.google.android.gms:play-services:9.0.1'
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+
 }

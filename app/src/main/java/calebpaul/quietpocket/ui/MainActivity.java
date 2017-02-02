@@ -43,10 +43,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import calebpaul.quietpocket.services.GeofenceTransitionService;
+import java.io.IOException;
+
 import calebpaul.quietpocket.R;
+import calebpaul.quietpocket.services.GeofenceTransitionService;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 import static calebpaul.quietpocket.R.id.geofence;
+import static calebpaul.quietpocket.services.GooglePlacesService.findPlaces;
 
 public class MainActivity extends AppCompatActivity
         implements
@@ -86,6 +92,20 @@ public class MainActivity extends AppCompatActivity
 
         // create GoogleApiClient
         createGoogleApi();
+
+        findPlaces("guitar in portland", new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+            }
+
+        });
     }
 
     // Create GoogleApiClient instance
