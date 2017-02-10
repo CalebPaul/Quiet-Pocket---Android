@@ -23,10 +23,10 @@ public class GooglePlacesService {
     public static void findPlaces(String queryText, Callback callback) {
         OkHttpClient client = new OkHttpClient.Builder().build();
         HttpUrl.Builder urlBuilder = HttpUrl.parse(Constants.GOOGLE_PLACES_BASE_URL).newBuilder();
-        urlBuilder.addQueryParameter("query", queryText);
-        urlBuilder.addQueryParameter("location", "42.3675294,-71.186966");
-        urlBuilder.addQueryParameter("radius", "10000");
-        urlBuilder.addQueryParameter("key", "AIzaSyA3JNepLgUVh8TB_TQqRnZOC_UFHQyOUz8");
+        urlBuilder.addQueryParameter(Constants.GOOGLE_PLACES_QUERY, queryText);
+        urlBuilder.addQueryParameter(Constants.GOOGLE_PLACES_LOCATION, "42.3675294,-71.186966");
+        urlBuilder.addQueryParameter(Constants.GOOGLE_PLACES_RADIUS, "10000");
+        urlBuilder.addQueryParameter(Constants.GOOGLE_PLACES_KEY, Constants.GOOGLE_PLACES_API_KEY);
         String url = urlBuilder.build().toString();
 
         Request request = new Request.Builder().url(url).build();
