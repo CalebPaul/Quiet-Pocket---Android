@@ -19,6 +19,7 @@ public class GooglePlacesService {
 
     // TODO - weight query with current location...
     // TODO - process response
+    // TODO - handle "W/okhttp3.OkHttpClient: A connection to https://maps.googleapis.com/ was leaked. Did you forget to close a response body?" error
 
     public static void findPlaces(String queryText, Callback callback) {
         OkHttpClient client = new OkHttpClient.Builder().build();
@@ -37,4 +38,29 @@ public class GooglePlacesService {
         call.enqueue(callback);
 
     }
+
+//    public String processPlaces(Response response) {
+//        String place = null;
+//        try {
+//
+//            String jsonData = response.body().string();
+//
+//            if (response.isSuccessful()) {
+//                JSONObject placeJSON = new JSONObject(jsonData);
+//                JSONArray resultsJSON = placeJSON.getJSONarray("results");
+//
+//                String latitude = ;
+//                String longitude = ;
+//                String name = ;
+//
+//                place = results.JSON.getJSONObject(0)
+//            }
+//        } catch () {
+//
+//        } catch () {
+//
+//        }
+//        return place;
+//    }
+
 }
