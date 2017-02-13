@@ -7,7 +7,7 @@
 ## Description
 
 _Quiet Pocket is an app that adjusts the user's ringtone status based on location._
-_It is designed for folks who do not want their phone to ring at an inapprapriate venue._
+_It is designed for folks who do not want their phone to ring at an inappropriate venue._
 
 ## User Stories
 * As a user, I want my phone to switch to vibrate when I am at the movie theater, or other specified locales.
