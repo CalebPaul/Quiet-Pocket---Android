@@ -44,9 +44,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import calebpaul.quietpocket.R;
 import calebpaul.quietpocket.services.GeofenceTransitionService;
+import calebpaul.quietpocket.services.GooglePlacesService;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity
         // create GoogleApiClient
         createGoogleApi();
 
-        findPlaces("guitar in portland", new Callback() {
+        findPlaces("coffee in SW Portland", new Callback() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -102,7 +104,8 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
+                ArrayList mPlaces = new ArrayList<>();
+                mPlaces = GooglePlacesService.processPlaces(response);
             }
 
         });
