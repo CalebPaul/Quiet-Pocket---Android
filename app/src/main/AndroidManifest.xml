@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
 
     <application
@@ -16,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service android:name="calebpaul.quietpocket.GeofenceTransitionService" />
+        <service android:name="calebpaul.quietpocket.services.GeofenceTransitionService" />
 
         <meta-data
         android:name="com.google.android.geo.API_KEY"
@@ -26,7 +27,7 @@
         android:name="com.google.android.gms.version"
         android:value="@integer/google_play_services_version" />
 
-        <activity android:name="calebpaul.quietpocket.MainActivity">
+        <activity android:name="calebpaul.quietpocket.ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

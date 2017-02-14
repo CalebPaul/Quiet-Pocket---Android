@@ -1,4 +1,4 @@
-package calebpaul.quietpocket;
+package calebpaul.quietpocket.ui;
 
 import android.Manifest;
 import android.app.PendingIntent;
@@ -43,6 +43,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import calebpaul.quietpocket.R;
+import calebpaul.quietpocket.services.GeofenceTransitionService;
+import calebpaul.quietpocket.services.GooglePlacesService;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+
+import static calebpaul.quietpocket.R.id.geofence;
+import static calebpaul.quietpocket.services.GooglePlacesService.findPlaces;
+
 public class MainActivity extends AppCompatActivity
         implements
         GoogleApiClient.ConnectionCallbacks,
@@ -81,6 +94,21 @@ public class MainActivity extends AppCompatActivity
 
         // create GoogleApiClient
         createGoogleApi();
+
+        findPlaces("coffee in SW Portland", new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                ArrayList mPlaces = new ArrayList<>();
+                mPlaces = GooglePlacesService.processPlaces(response);
+            }
+
+        });
     }
 
     // Create GoogleApiClient instance
@@ -121,7 +149,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch ( item.getItemId() ) {
-            case R.id.geofence: {
+            case geofence: {
                 startGeofence();
                 return true;
             }
@@ -347,7 +375,8 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private static final long GEO_DURATION = 60 * 60 * 1000; // 1 HR??
+//    private static final long GEO_DURATION = 60 * 60 * 1000; // 1 HR??
+    private static final long GEO_DURATION = Geofence.NEVER_EXPIRE; // 1 HR??
     private static final long GEO_LOITER = 15 * 1000;
     private static final String GEOFENCE_REQ_ID = "My Geofence";
     private static final float GEOFENCE_RADIUS = 15.0f; // in meters
