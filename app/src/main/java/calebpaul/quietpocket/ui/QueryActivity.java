@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -37,7 +36,6 @@ public class QueryActivity extends AppCompatActivity {
                 intent.putExtra("query", queryString);
 
                 startActivity(intent);
-                Toast.makeText(QueryActivity.this, "Enter Pressed", Toast.LENGTH_SHORT).show();
                 return true;
             }
         return false;

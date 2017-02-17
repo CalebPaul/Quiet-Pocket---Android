@@ -90,7 +90,8 @@ public class MainActivity extends AppCompatActivity
         textLat = (TextView) findViewById(R.id.lat);
         textLong = (TextView) findViewById(R.id.lon);
 
-
+        Intent queryIntent = getIntent();
+        String queryString = queryIntent.getStringExtra("query");
 
         // initialize GoogleMaps
         initGMaps();
@@ -98,7 +99,7 @@ public class MainActivity extends AppCompatActivity
         // create GoogleApiClient
         createGoogleApi();
 
-        findPlaces("coffee in SW Portland", new Callback() {
+        findPlaces(queryString, new Callback() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -149,6 +150,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    //DROPDOWN MEMU SELECTIONS
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch ( item.getItemId() ) {
@@ -324,7 +326,7 @@ public class MainActivity extends AppCompatActivity
             if ( locationMarker != null )
                 locationMarker.remove();
             locationMarker = map.addMarker(markerOptions);
-            float zoom = 19f; //Default zoom is 14f
+            float zoom = 18f; //Default zoom is 14f
 //            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
 //            map.animateCamera(cameraUpdate);
 
