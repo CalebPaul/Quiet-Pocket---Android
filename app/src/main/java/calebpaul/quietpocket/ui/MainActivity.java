@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity
     private Location lastLocation;
     private TextView textLat, textLong;
     private MapFragment mapFragment;
+    private String userQuery; //TODO - finish grabbing intent from QueryActivity
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
     // Create a Intent send by the notification
@@ -88,6 +89,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         textLat = (TextView) findViewById(R.id.lat);
         textLong = (TextView) findViewById(R.id.lon);
+
+
 
         // initialize GoogleMaps
         initGMaps();

@@ -19,23 +19,12 @@ public class Place {
         return mLatitude;
     }
 
-    public void setmLatitude(String mLatitude) {
-        this.mLatitude = mLatitude;
-    }
-
     public String getmLongitude() {
         return mLongitude;
-    }
-
-    public void setmLongitude(String mLongitude) {
-        this.mLongitude = mLongitude;
     }
 
     public String getmName() {
         return mName;
     }
 
-    public void setmName(String mName) {
-        this.mName = mName;
-    }
 }

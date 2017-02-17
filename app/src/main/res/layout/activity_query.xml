@@ -10,4 +10,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="calebpaul.quietpocket.ui.QueryActivity">
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:ellipsize="start"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="193dp"
+        android:id="@+id/queryEditText"
+        android:inputType="text"
+        android:hint="breakfast cafe in sw pdx"
+        android:imeOptions="actionSend"
+        android:maxLines="1"
+        tools:textAppearance="@android:style/TextAppearance.Holo.Light.Widget.EditText"
+        android:textAppearance="@android:style/TextAppearance.Holo.Large" />
 </RelativeLayout>
