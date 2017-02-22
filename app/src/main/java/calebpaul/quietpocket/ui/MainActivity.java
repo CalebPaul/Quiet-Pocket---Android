@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity
     private Location lastLocation;
     private TextView textLat, textLong;
     private MapFragment mapFragment;
-    private String userQuery; //TODO - finish grabbing intent from QueryActivity
+    private String queryString; //TODO - finish grabbing intent from QueryActivity
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
     // Create a Intent send by the notification
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity
         textLong = (TextView) findViewById(R.id.lon);
 
         Intent queryIntent = getIntent();
-        String queryString = queryIntent.getStringExtra("query");
+        queryString = queryIntent.getStringExtra("query");
 
         // initialize GoogleMaps
         initGMaps();
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    //DROPDOWN MEMU SELECTIONS
+    //DROPDOWN MENU SELECTIONS
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch ( item.getItemId() ) {
@@ -243,8 +243,8 @@ public class MainActivity extends AppCompatActivity
     private LocationRequest locationRequest;
     // Defined in milliseconds.
     // This number in extremely low, and should be used only for debug
-    private final int UPDATE_INTERVAL =  1000;
-    private final int FASTEST_INTERVAL = 900;
+    private final int UPDATE_INTERVAL =  2000;
+    private final int FASTEST_INTERVAL = 1500;
 
     // Start location Updates
     private void startLocationUpdates(){
@@ -254,8 +254,9 @@ public class MainActivity extends AppCompatActivity
                 .setInterval(UPDATE_INTERVAL)
                 .setFastestInterval(FASTEST_INTERVAL);
 
-        if ( checkPermission() )
+        if ( checkPermission() ) {
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        }
     }
 
     @Override
@@ -382,9 +383,9 @@ public class MainActivity extends AppCompatActivity
 
 //    private static final long GEO_DURATION = 60 * 60 * 1000; // 1 HR??
     private static final long GEO_DURATION = Geofence.NEVER_EXPIRE; // 1 HR??
-    private static final long GEO_LOITER = 15 * 1000;
+    private static final long GEO_LOITER = 8 * 1000;
     private static final String GEOFENCE_REQ_ID = "My Geofence";
-    private static final float GEOFENCE_RADIUS = 15.0f; // in meters
+    private static final float GEOFENCE_RADIUS = 16.0f; // in meters
 
     // Create a Geofence
     private Geofence createGeofence( LatLng latLng, float radius ) {
