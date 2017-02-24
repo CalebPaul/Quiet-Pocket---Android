@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity
     private TextView textLat, textLong;
     private MapFragment mapFragment;
     private String queryString;
+    private String userLocationString;
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
     // Create a Intent send by the notification
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity
 
         Intent queryIntent = getIntent();
         queryString = queryIntent.getStringExtra("query");
+        userLocationString = queryIntent.getStringExtra("location");
 
         // initialize GoogleMaps
         initGMaps();
@@ -99,8 +101,8 @@ public class MainActivity extends AppCompatActivity
         // create GoogleApiClient
         createGoogleApi();
 
-        findPlaces(queryString, new Callback() {
-
+        findPlaces(queryString, userLocationString, new Callback() {
+        //TODO - Validate zero response from api
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -180,7 +182,7 @@ public class MainActivity extends AppCompatActivity
     private void askPermission() {
         Log.d(TAG, "askPermission()");
         ActivityCompat.requestPermissions(
-                this,
+                MainActivity.this,
                 new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
                 REQ_PERMISSION
         );
@@ -368,6 +370,8 @@ public class MainActivity extends AppCompatActivity
 
         }
     }
+    private Marker queryGeoFenceMarker;
+
 
     // Start Geofence creation process
     private void startGeofence() {
