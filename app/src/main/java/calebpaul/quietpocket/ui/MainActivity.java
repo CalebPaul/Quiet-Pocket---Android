@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity
     private Location lastLocation;
     private TextView textLat, textLong;
     private MapFragment mapFragment;
-    private String queryString; //TODO - finish grabbing intent from QueryActivity
+    private String queryString;
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
     // Create a Intent send by the notification
