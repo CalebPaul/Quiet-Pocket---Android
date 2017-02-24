@@ -245,8 +245,8 @@ public class MainActivity extends AppCompatActivity
     private LocationRequest locationRequest;
     // Defined in milliseconds.
     // This number in extremely low, and should be used only for debug
-    private final int UPDATE_INTERVAL =  2000;
-    private final int FASTEST_INTERVAL = 1500;
+    private final int UPDATE_INTERVAL =  15000;
+    private final int FASTEST_INTERVAL = 3000;
 
     // Start location Updates
     private void startLocationUpdates(){
