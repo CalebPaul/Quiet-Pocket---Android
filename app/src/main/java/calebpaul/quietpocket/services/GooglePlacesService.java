@@ -25,9 +25,7 @@ import okhttp3.Response;
 public class GooglePlacesService {
     public static final String TAG = GooglePlacesService.class.getSimpleName();
 
-    // TODO - weight query with current location
-    // TODO - handle "W/okhttp3.OkHttpClient: A connection to https://maps.googleapis.com/ was leaked. Did you forget to close a response body?" error
-    // TODO - handle next page token
+    // TODO - handle next page token? or nah?
 
     public static void findPlaces(String queryText, String userLocation, Callback callback) {
         OkHttpClient client = new OkHttpClient.Builder().build();
