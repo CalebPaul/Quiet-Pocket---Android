@@ -61,7 +61,7 @@ public class QueryActivity extends AppCompatActivity
             Intent intent = new Intent(QueryActivity.this, MainActivity.class);
             intent.putExtra("query", queryString);
             intent.putExtra("location", userLocation);
-            Log.v(TAG, userLocation);
+//            Log.v(TAG, userLocation);
             startActivity(intent);
             return true;
         }

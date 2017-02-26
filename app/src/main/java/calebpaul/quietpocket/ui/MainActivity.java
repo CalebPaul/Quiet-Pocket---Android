@@ -75,6 +75,8 @@ public class MainActivity extends AppCompatActivity
     private MapFragment mapFragment;
     private String queryString;
     private String userLocationString;
+    private boolean firstMapLoad = true;
+
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
     // Create a Intent send by the notification
@@ -145,6 +147,7 @@ public class MainActivity extends AppCompatActivity
         googleApiClient.disconnect();
     }
 
+//    Options Dropdown Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -333,13 +336,17 @@ public class MainActivity extends AppCompatActivity
 //            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
 //            map.animateCamera(cameraUpdate);
 
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(latLng)
-                    .zoom(zoom)
-                    .bearing(0)
-                    .tilt(35)
-                    .build();
-            map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            if (firstMapLoad) {
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(latLng)
+                        .zoom(zoom)
+                        .bearing(0)
+                        .tilt(35)
+                        .build();
+
+                map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            }
+
 
         }
     }
