@@ -44,9 +44,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import calebpaul.quietpocket.R;
+import calebpaul.quietpocket.models.Place;
 import calebpaul.quietpocket.services.GeofenceTransitionService;
 import calebpaul.quietpocket.services.GooglePlacesService;
 import okhttp3.Call;
@@ -73,6 +74,11 @@ public class MainActivity extends AppCompatActivity
     private Location lastLocation;
     private TextView textLat, textLong;
     private MapFragment mapFragment;
+    private String queryString;
+    private String userLocationString;
+    private boolean firstMapLoad = true;
+    private final LatLng testLatLng = null;
+
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
     // Create a Intent send by the notification
@@ -89,14 +95,18 @@ public class MainActivity extends AppCompatActivity
         textLat = (TextView) findViewById(R.id.lat);
         textLong = (TextView) findViewById(R.id.lon);
 
+        Intent queryIntent = getIntent();
+        queryString = queryIntent.getStringExtra("query");
+        userLocationString = queryIntent.getStringExtra("location");
+
         // initialize GoogleMaps
         initGMaps();
 
         // create GoogleApiClient
         createGoogleApi();
 
-        findPlaces("coffee in SW Portland", new Callback() {
-
+        findPlaces(queryString, userLocationString, new Callback() {
+        //TODO - Validate zero response from api
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -104,8 +114,11 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                ArrayList mPlaces = new ArrayList<>();
-                mPlaces = GooglePlacesService.processPlaces(response);
+
+                List<Place> mPlaces = GooglePlacesService.processPlaces(response);
+                Log.v(TAG, mPlaces.get(0).getmName() + ": " + mPlaces.get(0).getmLatitude() + ", " + mPlaces.get(0).getmLongitude());
+                LatLng testLatLng = new LatLng( Double.parseDouble(mPlaces.get(0).getmLatitude()), Double.parseDouble(mPlaces.get(0).getmLongitude()) );
+
             }
 
         });
@@ -139,6 +152,7 @@ public class MainActivity extends AppCompatActivity
         googleApiClient.disconnect();
     }
 
+//    Options Dropdown Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -146,6 +160,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    //DROPDOWN MENU SELECTIONS
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch ( item.getItemId() ) {
@@ -175,7 +190,7 @@ public class MainActivity extends AppCompatActivity
     private void askPermission() {
         Log.d(TAG, "askPermission()");
         ActivityCompat.requestPermissions(
-                this,
+                MainActivity.this,
                 new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
                 REQ_PERMISSION
         );
@@ -221,12 +236,16 @@ public class MainActivity extends AppCompatActivity
         map = googleMap;
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
+        markerForGeofence(testLatLng);
+        Log.v(TAG, "TEST LAT LONG" + ": " + String.valueOf(testLatLng.latitude) + ", " + String.valueOf(testLatLng.longitude));
+
     }
 
     @Override
     public void onMapClick(LatLng latLng) {
-        Log.d(TAG, "onMapClick("+latLng +")");
-        markerForGeofence(latLng);
+//        Log.d(TAG, "onMapClick("+latLng +")");
+//        markerForGeofence(latLng);
+//        markerForGeofence(testLatLng);
     }
 
     @Override
@@ -238,8 +257,8 @@ public class MainActivity extends AppCompatActivity
     private LocationRequest locationRequest;
     // Defined in milliseconds.
     // This number in extremely low, and should be used only for debug
-    private final int UPDATE_INTERVAL =  1000;
-    private final int FASTEST_INTERVAL = 900;
+    private final int UPDATE_INTERVAL =  15000;
+    private final int FASTEST_INTERVAL = 3000;
 
     // Start location Updates
     private void startLocationUpdates(){
@@ -249,8 +268,9 @@ public class MainActivity extends AppCompatActivity
                 .setInterval(UPDATE_INTERVAL)
                 .setFastestInterval(FASTEST_INTERVAL);
 
-        if ( checkPermission() )
+        if ( checkPermission() ) {
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        }
     }
 
     @Override
@@ -321,17 +341,21 @@ public class MainActivity extends AppCompatActivity
             if ( locationMarker != null )
                 locationMarker.remove();
             locationMarker = map.addMarker(markerOptions);
-            float zoom = 19f; //Default zoom is 14f
+            float zoom = 18f; //Default zoom is 14f
 //            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
 //            map.animateCamera(cameraUpdate);
 
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(latLng)
-                    .zoom(zoom)
-                    .bearing(0)
-                    .tilt(35)
-                    .build();
-            map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            if (firstMapLoad) {
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(latLng)
+                        .zoom(zoom)
+                        .bearing(0)
+                        .tilt(35)
+                        .build();
+
+                map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            }
+
 
         }
     }
@@ -362,6 +386,8 @@ public class MainActivity extends AppCompatActivity
 
         }
     }
+    private Marker queryGeoFenceMarker;
+
 
     // Start Geofence creation process
     private void startGeofence() {
@@ -377,9 +403,9 @@ public class MainActivity extends AppCompatActivity
 
 //    private static final long GEO_DURATION = 60 * 60 * 1000; // 1 HR??
     private static final long GEO_DURATION = Geofence.NEVER_EXPIRE; // 1 HR??
-    private static final long GEO_LOITER = 15 * 1000;
+    private static final long GEO_LOITER = 8 * 1000;
     private static final String GEOFENCE_REQ_ID = "My Geofence";
-    private static final float GEOFENCE_RADIUS = 15.0f; // in meters
+    private static final float GEOFENCE_RADIUS = 16.0f; // in meters
 
     // Create a Geofence
     private Geofence createGeofence( LatLng latLng, float radius ) {

@@ -22,7 +22,7 @@
             android:id="@+id/lat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:textColor="@color/colorWhite"
             android:layout_weight="0.5"
             android:text="Lat: " />
 
@@ -31,7 +31,7 @@
             android:id="@+id/lon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:textColor="@color/colorWhite"
             android:layout_weight="0.5"
             android:text="Long: " />
     </LinearLayout>

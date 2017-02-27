@@ -25,16 +25,13 @@ import okhttp3.Response;
 public class GooglePlacesService {
     public static final String TAG = GooglePlacesService.class.getSimpleName();
 
+    // TODO - handle next page token? or nah?
 
-    // TODO - weight query with current location
-    // TODO - handle "W/okhttp3.OkHttpClient: A connection to https://maps.googleapis.com/ was leaked. Did you forget to close a response body?" error
-    // TODO - handle next page token
-
-    public static void findPlaces(String queryText, Callback callback) {
+    public static void findPlaces(String queryText, String userLocation, Callback callback) {
         OkHttpClient client = new OkHttpClient.Builder().build();
         HttpUrl.Builder urlBuilder = HttpUrl.parse(Constants.GOOGLE_PLACES_BASE_URL).newBuilder();
         urlBuilder.addQueryParameter(Constants.GOOGLE_PLACES_QUERY, queryText);
-        urlBuilder.addQueryParameter(Constants.GOOGLE_PLACES_LOCATION, "42.3675294,-71.186966");
+        urlBuilder.addQueryParameter(Constants.GOOGLE_PLACES_LOCATION, userLocation);
         urlBuilder.addQueryParameter(Constants.GOOGLE_PLACES_RADIUS, "10000");
         urlBuilder.addQueryParameter(Constants.GOOGLE_PLACES_KEY, Constants.GOOGLE_PLACES_API_KEY);
         String url = urlBuilder.build().toString();
@@ -45,7 +42,6 @@ public class GooglePlacesService {
 
         Call call = client.newCall(request);
         call.enqueue(callback);
-
     }
 
     public static ArrayList<Place> processPlaces(Response response) {
@@ -69,9 +65,7 @@ public class GooglePlacesService {
                     Place newPlace = new Place(latitude, longitude, name);
                     Log.v(TAG, ">>Place<< " + newPlace.getmName() + ": " + newPlace.getmLatitude() + "," + newPlace.getmLongitude());
                     newPlaces.add(newPlace);
-
                 }
-
 
             }
         } catch (IOException e) {
@@ -81,5 +75,7 @@ public class GooglePlacesService {
         }
         return newPlaces;
     }
+
+
 
 }
