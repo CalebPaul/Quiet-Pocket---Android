@@ -44,9 +44,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import calebpaul.quietpocket.R;
+import calebpaul.quietpocket.models.Place;
 import calebpaul.quietpocket.services.GeofenceTransitionService;
 import calebpaul.quietpocket.services.GooglePlacesService;
 import okhttp3.Call;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity
     private String queryString;
     private String userLocationString;
     private boolean firstMapLoad = true;
+    private final LatLng testLatLng = null;
 
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
@@ -112,8 +114,11 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                ArrayList mPlaces = new ArrayList<>();
-                mPlaces = GooglePlacesService.processPlaces(response);
+
+                List<Place> mPlaces = GooglePlacesService.processPlaces(response);
+                Log.v(TAG, mPlaces.get(0).getmName() + ": " + mPlaces.get(0).getmLatitude() + ", " + mPlaces.get(0).getmLongitude());
+                LatLng testLatLng = new LatLng( Double.parseDouble(mPlaces.get(0).getmLatitude()), Double.parseDouble(mPlaces.get(0).getmLongitude()) );
+
             }
 
         });
@@ -231,12 +236,16 @@ public class MainActivity extends AppCompatActivity
         map = googleMap;
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
+        markerForGeofence(testLatLng);
+        Log.v(TAG, "TEST LAT LONG" + ": " + String.valueOf(testLatLng.latitude) + ", " + String.valueOf(testLatLng.longitude));
+
     }
 
     @Override
     public void onMapClick(LatLng latLng) {
-        Log.d(TAG, "onMapClick("+latLng +")");
-        markerForGeofence(latLng);
+//        Log.d(TAG, "onMapClick("+latLng +")");
+//        markerForGeofence(latLng);
+//        markerForGeofence(testLatLng);
     }
 
     @Override
