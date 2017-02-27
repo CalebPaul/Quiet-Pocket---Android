@@ -27,4 +27,15 @@ public class Place {
         return mName;
     }
 
+    public void setmLongitude(String mLongitude) {
+        this.mLongitude = mLongitude;
+    }
+
+    public void setmName(String mName) {
+        this.mName = mName;
+    }
+
+    public void setmLatitude(String mLatitude) {
+        this.mLatitude = mLatitude;
+    }
 }
