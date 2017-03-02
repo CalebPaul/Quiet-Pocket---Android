@@ -1,10 +1,12 @@
 package calebpaul.quietpocket.models;
 
+import io.realm.RealmObject;
+
 /**
  * Created by calebpaul on 2/10/17.
  */
 
-public class Place {
+public class Place extends RealmObject {
     private String mLatitude;
     private String mLongitude;
     private String mName;
@@ -14,6 +16,8 @@ public class Place {
         this.mLongitude = mLongitude;
         this.mName = mName;
     }
+
+    public Place() {}
 
     public String getmLatitude() {
         return mLatitude;
