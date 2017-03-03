@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity
         textLat = (TextView) findViewById(R.id.lat);
         textLong = (TextView) findViewById(R.id.lon);
 
-        Realm.init(MainActivity.this);
+        Realm.init(this);
         realm = Realm.getDefaultInstance();
 
         Intent queryIntent = getIntent();
@@ -136,6 +136,8 @@ public class MainActivity extends AppCompatActivity
             public void onResponse(Call call, Response response) throws IOException {
                 //TODO - Add loop
                 Log.v(TAG, "onResponse()");
+                Log.v(TAG, "QUERY: " + queryString);
+
                 List<Place> mPlaces = GooglePlacesService.processPlaces(response);
 
                 Log.v(TAG, mPlaces.get(0).getmName() + ": " + mPlaces.get(0).getmLatitude() + ", " + mPlaces.get(0).getmLongitude());
@@ -158,14 +160,18 @@ public class MainActivity extends AppCompatActivity
     private void savePlaceInDatabase(Place place) {
         Log.v(TAG, "savePlaceInDatabase()");
 
-        final Place[] newPlace = {new Place(place.getmLatitude(), place.getmLongitude(), place.getmName())};
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final Place[] newPlace = {new Place(place.getmLatitude(), place.getmLongitude(), place.getmName())};
 
-        realm.executeTransaction();
+                realm.beginTransaction();
+                newPlace[0] = realm.createObject(Place.class);
+                realm.commitTransaction();
+            }
+        });
 
-        realm.executeTransactionAsync(bgRealm -> {
-            newPlace[0] = bgRealm.createObject(Place.class);
-        }, () -> Log.v("DB", ">>>input stored<<<"), error -> Log.v("DB", ">>> "+error.getMessage()+" <<<"));
-        realm.close();
+
     }
 
     protected void onDestroy() {
