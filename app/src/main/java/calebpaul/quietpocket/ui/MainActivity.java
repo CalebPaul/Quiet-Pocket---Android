@@ -56,6 +56,7 @@ import calebpaul.quietpocket.models.Place;
 import calebpaul.quietpocket.services.GeofenceTransitionService;
 import calebpaul.quietpocket.services.GooglePlacesService;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -108,8 +109,11 @@ public class MainActivity extends AppCompatActivity
         textLat = (TextView) findViewById(R.id.lat);
         textLong = (TextView) findViewById(R.id.lon);
 
+        // initialize db
         Realm.init(this);
         realm = Realm.getDefaultInstance();
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().build();
+        Realm.setDefaultConfiguration(realmConfiguration);
 
         Intent queryIntent = getIntent();
         queryString = queryIntent.getStringExtra("query");
@@ -135,43 +139,96 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 //TODO - Add loop
-                Log.v(TAG, "onResponse()");
+                Log.v(TAG, "FindPlaces->()onResponse()");
                 Log.v(TAG, "QUERY: " + queryString);
 
                 List<Place> mPlaces = GooglePlacesService.processPlaces(response);
 
-                Log.v(TAG, mPlaces.get(0).getmName() + ": " + mPlaces.get(0).getmLatitude() + ", " + mPlaces.get(0).getmLongitude());
+                Log.v(TAG, "ON RESPONSE: "+mPlaces.get(0).getmName() + ": " + mPlaces.get(0).getmLatitude() + ", " + mPlaces.get(0).getmLongitude());
 
                 for (Place place: mPlaces) {
                     try {
                         Log.v(TAG, "Save to DB loop in onResponse()");
                         savePlaceInDatabase(place);
                     } finally {
+//                        dropMarkers();
 //                        realm.close();
                     }
                 }
 
             }
-
         });
 
     }
 
+    //TODO - save in db, drop markers, delete non selected markers from db
+    private void dropMarkers() {
+        List<Place> allPlaces = getPlaces();
+        Log.v(TAG, "dropMarkers() ->Length of allPlaces: " + String.valueOf(allPlaces.size()));
+
+        double newLat;
+        double newLng;
+        Log.v(TAG, "pre-loop");
+        for (Place newPlace: allPlaces) {
+            Log.v(TAG, "in-loop");
+            Log.v(TAG, newPlace.getmName());
+            Log.v(TAG, "place object: " + String.valueOf(newPlace));
+            newLat = Double.valueOf(newPlace.getmLatitude());
+            newLng = Double.valueOf(newPlace.getmLongitude());
+
+            LatLng newLatLng = new LatLng(newLat, newLng);
+            markerForGeofence(newLatLng);
+
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    realm.beginTransaction();
+//                    drawGeofence();
+//                    realm.commitTransaction();
+//                }
+//            });
+        }
+    }
+
     private void savePlaceInDatabase(Place place) {
-        Log.v(TAG, "savePlaceInDatabase()");
+        Log.v(TAG, "savePlaceInDatabase() ->"+place.getmName());
+        String lat = place.getmLatitude();
+        String lng = place.getmLongitude();
+        String name = place.getmName();
+        Log.v(TAG, "path: "+realm.getPath());
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final Place[] newPlace = {new Place(place.getmLatitude(), place.getmLongitude(), place.getmName())};
-
-                realm.beginTransaction();
-                newPlace[0] = realm.createObject(Place.class);
-                realm.commitTransaction();
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        Place savePlace = realm.createObject(Place.class);
+                        savePlace.setmLatitude(lat);
+                        savePlace.setmLongitude(lng);
+                        savePlace.setmName(name);
+                    }
+                });
             }
         });
+    }
 
-
+    private List<Place> getPlaces() {
+        Log.v(TAG, "getPlaces()");
+        List<Place> newPlaces = new ArrayList<>();
+        try {
+            realm = Realm.getDefaultInstance();
+            RealmResults<Place> newRealmPlaces = realm.where(Place.class).findAll();
+            Log.v(TAG, "Realm length of newRealmPlaces: " + String.valueOf(newRealmPlaces.size()));
+            Log.v(TAG, "Realm Object Test: " + String.valueOf(newRealmPlaces.get(0).getmName()));
+            newPlaces.addAll(realm.copyFromRealm(newRealmPlaces));
+        } finally {
+            if (realm != null) {
+                realm.close();
+            }
+        }
+        Log.v(TAG, "Object Test: " + newPlaces.get(0).toString());
+        return newPlaces;
     }
 
     protected void onDestroy() {
@@ -297,31 +354,6 @@ public class MainActivity extends AppCompatActivity
         map = googleMap;
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
-        List<Place> allPlaces = getPlaces();
-//        Log.v(TAG, String.valueOf(allPlaces.get(0).getmName()));
-        Log.v(TAG, "pre-loop");
-        for (Place newPlace: allPlaces) {
-            Log.v(TAG, "in-loop");
-            LatLng newLatLng = new LatLng(Double.valueOf(newPlace.getmLatitude()), Double.valueOf(newPlace.getmLongitude()));
-            markerForGeofence(newLatLng);
-            Log.v(TAG, "TEST LAT LONGS: " + String.valueOf(newLatLng.latitude) + ", " + String.valueOf(newLatLng.longitude));
-        }
-        //TODO - Do some more stuff?
-    }
-
-    private List<Place> getPlaces() {
-        Log.v(TAG, "getPlaces()");
-        List<Place> newPlaces = new ArrayList<>();
-        try {
-            realm = Realm.getDefaultInstance();
-            RealmResults<Place> newRealmPlaces = realm.where(Place.class).findAll();
-            newPlaces.addAll(realm.copyFromRealm(newRealmPlaces));
-        } finally {
-            if (realm != null) {
-                realm.close();
-            }
-        }
-        return newPlaces;
     }
 
     @Override
