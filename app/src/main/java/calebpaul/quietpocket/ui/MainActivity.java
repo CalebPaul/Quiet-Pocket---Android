@@ -25,7 +25,6 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -175,7 +174,6 @@ public class MainActivity extends AppCompatActivity
 
                 }
                 dropMarkers();
-//                realm.close();
             }
         });
 
@@ -303,6 +301,15 @@ public class MainActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         realm.close();
+
+        if (googleApiClient.isConnected()) {
+            googleApiClient.disconnect();
+        }
+        if (client != null) {
+            if (client.isConnected()) {
+                client.disconnect();
+            }
+        }
     }
 
     // Create GoogleApiClient instance
@@ -328,16 +335,18 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onStop() {
-        super.onStop();// ATTENTION: This was auto-generated to implement the App Indexing API.
-// See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-
-        // Disconnect GoogleApiClient when stopping Activity
-        googleApiClient.disconnect();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.disconnect();
+        super.onStop();
         realm.close();
+
+        if (googleApiClient.isConnected()) {
+            googleApiClient.disconnect();
+        }
+        if (client != null) {
+            if (client.isConnected()) {
+                client.disconnect();
+            }
+        }
+
     }
 
     //    Options Dropdown Menu
