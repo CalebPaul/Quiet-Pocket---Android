@@ -65,9 +65,8 @@ import okhttp3.Response;
 import static calebpaul.quietpocket.R.id.geofence;
 import static calebpaul.quietpocket.services.GooglePlacesService.findPlaces;
 
-//TODO - Find where to close realms
 //TODO - Add boolean to model
-//TODO - drop markers, delete non selected markers from db
+//TODO - delete non selected markers from db
 
 
 public class MainActivity extends AppCompatActivity
@@ -86,15 +85,12 @@ public class MainActivity extends AppCompatActivity
     private GoogleMap map;
     private GoogleApiClient googleApiClient;
     private Location lastLocation;
-    private TextView textLat, textLong;
+    private TextView textLat, textLong, textName;
     private MapFragment mapFragment;
     private String queryString;
     private String userLocationString;
     private boolean firstMapLoad = true;
     private ArrayList<Place> allPlaces;
-//    private LatLng fenceLimitLatLng;
-
-
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
     /**
