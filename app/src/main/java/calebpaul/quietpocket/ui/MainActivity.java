@@ -444,7 +444,6 @@ public class MainActivity extends AppCompatActivity
         //TODO - Add click behaviour
 //        Log.d(TAG, "onMapClick("+latLng +")");
 //        markerForGeofence(latLng);
-//        markerForGeofence(testLatLng);
     }
 
     @Override
