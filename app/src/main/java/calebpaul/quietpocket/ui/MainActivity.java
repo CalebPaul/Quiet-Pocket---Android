@@ -67,6 +67,9 @@ import static calebpaul.quietpocket.R.id.geofence;
 import static calebpaul.quietpocket.services.GooglePlacesService.findPlaces;
 
 //TODO - Find where to close realms
+//TODO - Add boolean to model
+//TODO - drop markers, delete non selected markers from db
+
 
 public class MainActivity extends AppCompatActivity
         implements
@@ -90,6 +93,8 @@ public class MainActivity extends AppCompatActivity
     private String userLocationString;
     private boolean firstMapLoad = true;
     private ArrayList<Place> allPlaces;
+//    private LatLng fenceLimitLatLng;
+
 
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
@@ -150,7 +155,6 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                //TODO - Add loop
                 Log.v(TAG, "FindPlaces->()onResponse()");
                 Log.v(TAG, "QUERY: " + queryString);
 
@@ -192,10 +196,15 @@ public class MainActivity extends AppCompatActivity
                 deletedPlaces.deleteAllFromRealm();
             }
         });
-    }
 
-    //TODO - drop markers, delete non selected markers from db
-//    List<Place> allPlaces;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                RealmResults<Place> deletedPlacesUiThread = realm.where(Place.class).findAll();
+                deletedPlacesUiThread.deleteAllFromRealm();
+            }
+        });
+    }
 
     private void dropMarkers() {
         final double[] newLat = new double[1];
@@ -226,28 +235,11 @@ public class MainActivity extends AppCompatActivity
                             @Override
                             public void run() {
                                 Log.v(TAG, "dropMarkers()->pre-markerForGeofence() call");
-                                //THREAD TEST
-//                        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-//                            Log.v(TAG, "dropMarkers() Runnable NOT IN MAIN THREAD");
-//                        } else {
-//                            Log.v(TAG, "dropMarkers() Runnable MAIN THREAD");
-//                        }
                                 markerForGeofence(newLatLng);
                             }
                         });
                     }
-
-
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    realm.beginTransaction();
-//                    drawGeofence();
-//                    realm.commitTransaction();
-//                }
-//            });
                 }
-
             }
         });
 
@@ -263,19 +255,13 @@ public class MainActivity extends AppCompatActivity
 
 //        Log.v(TAG, "path: "+realm.getPath());
 
-//        realm.beginTransaction();
-//        Place savePlace = realm.createObject(Place.class);
-//        savePlace.setmLatitude(lat);
-//        savePlace.setmLongitude(lng);
-//        savePlace.setmName(name);
-//        realm.commitTransaction();
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
+
                         //THREAD TEST
 //                        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
 //                            Log.v(TAG, "saveInDB() Runnable MAIN THREAD?");
@@ -351,6 +337,7 @@ public class MainActivity extends AppCompatActivity
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client.disconnect();
+        realm.close();
     }
 
     //    Options Dropdown Menu
@@ -442,13 +429,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapClick(LatLng latLng) {
         //TODO - Add click behaviour
-//        Log.d(TAG, "onMapClick("+latLng +")");
-//        markerForGeofence(latLng);
+        Log.d(TAG, "onMapClick("+latLng +")");
+        markerForGeofence(latLng);
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
         Log.d(TAG, "onMarkerClickListener: " + marker.getPosition());
+//        fenceLimitLatLng = marker.getPosition();
+        geoFenceLimits.setCenter(marker.getPosition());
+        geoFenceMarker.setPosition(marker.getPosition());
         return false;
     }
 
@@ -483,7 +473,7 @@ public class MainActivity extends AppCompatActivity
     public void onConnected(@Nullable Bundle bundle) {
         Log.i(TAG, "onConnected()");
         getLastKnownLocation();
-        recoverGeofenceMarker();
+        recoverGeofenceMarker(); //TODO - find all where bool
     }
 
     // GoogleApiClient.ConnectionCallbacks suspended
@@ -539,7 +529,7 @@ public class MainActivity extends AppCompatActivity
             if (locationMarker != null)
                 locationMarker.remove();
             locationMarker = map.addMarker(markerOptions);
-            float zoom = 18f; //Default zoom is 14f
+            float zoom = 16f; //Default zoom is 14f, close view is 18f
 //            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
 //            map.animateCamera(cameraUpdate);
 
@@ -595,6 +585,7 @@ public class MainActivity extends AppCompatActivity
         Log.i(TAG, "startGeofence()");
         if (geoFenceMarker != null) {
             Geofence geofence = createGeofence(geoFenceMarker.getPosition(), GEOFENCE_RADIUS);
+            Log.v(TAG, "GEO DEETS: "+geofence.toString());
             GeofencingRequest geofenceRequest = createGeofenceRequest(geofence);
             addGeofence(geofenceRequest);
         } else {
@@ -606,7 +597,7 @@ public class MainActivity extends AppCompatActivity
     private static final long GEO_DURATION = Geofence.NEVER_EXPIRE; // 1 HR??
     private static final long GEO_LOITER = 8 * 1000;
     private static final String GEOFENCE_REQ_ID = "Quiet Pocket";
-    private static final float GEOFENCE_RADIUS = 16.0f; // in meters
+    private static final float GEOFENCE_RADIUS = 18.0f; // in meters
 
     // Create a Geofence
     private Geofence createGeofence(LatLng latLng, float radius) {
@@ -634,13 +625,14 @@ public class MainActivity extends AppCompatActivity
                 .build();
     }
 
-    private PendingIntent geoFencePendingIntent;
+    private PendingIntent geoFencePendingIntent; //Lint is wrong, this is definitely assigned.
     private final int GEOFENCE_REQ_CODE = 0;
 
     private PendingIntent createGeofencePendingIntent() {
         Log.d(TAG, "createGeofencePendingIntent");
-        if (geoFencePendingIntent != null)
+        if (geoFencePendingIntent != null) {
             return geoFencePendingIntent;
+        }
 
         Intent intent = new Intent(this, GeofenceTransitionService.class);
         return PendingIntent.getService(
@@ -662,10 +654,13 @@ public class MainActivity extends AppCompatActivity
     public void onResult(@NonNull Status status) {
         Log.i(TAG, "onResult: " + status);
         if (status.isSuccess()) {
-            saveGeofence();
+//            saveGeofence();
             drawGeofence();
+            Log.v(TAG, "Bob Ross");
+
         } else {
             // inform about fail
+            Log.v(TAG, "Didn't work because reasons.");
         }
     }
 
@@ -675,9 +670,17 @@ public class MainActivity extends AppCompatActivity
     private void drawGeofence() {
         Log.d(TAG, "drawGeofence()");
 
-        if (geoFenceLimits != null)
+        if (geoFenceLimits != null) {
             geoFenceLimits.remove();
+        }
 
+        if (geoFenceLimits == null) {
+            Log.v(TAG, "NO LIMIT SOULJA");
+        } else {
+            Log.v(TAG, "GEOFENCE LIMITS EXIST: "+geoFenceLimits.getCenter().toString());
+        }
+
+        Log.v(TAG, "drawGeofence()->GEOFENCE MARKER POSITION"+geoFenceMarker.getPosition());
         CircleOptions circleOptions = new CircleOptions()
                 .center(geoFenceMarker.getPosition())
                 .strokeColor(Color.argb(50, 70, 70, 70))
