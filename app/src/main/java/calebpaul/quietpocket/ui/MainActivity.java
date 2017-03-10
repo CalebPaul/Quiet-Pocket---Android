@@ -12,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -65,6 +66,8 @@ import okhttp3.Response;
 import static calebpaul.quietpocket.R.id.geofence;
 import static calebpaul.quietpocket.services.GooglePlacesService.findPlaces;
 
+//TODO - Find where to close realms
+
 public class MainActivity extends AppCompatActivity
         implements
         GoogleApiClient.ConnectionCallbacks,
@@ -86,7 +89,8 @@ public class MainActivity extends AppCompatActivity
     private String queryString;
     private String userLocationString;
     private boolean firstMapLoad = true;
-    private LatLng newLatlng;
+    private ArrayList<Place> allPlaces;
+
 
     private static final String NOTIFICATION_MSG = "QUIET POCKET";
     /**
@@ -115,16 +119,24 @@ public class MainActivity extends AppCompatActivity
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().build();
         Realm.setDefaultConfiguration(realmConfiguration);
 
+        //THREAD TEST
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.v(TAG, "onCreate() MAIN THREAD");
+        } else {
+            Log.v(TAG, "onCreate() NOT MAIN THREAD");
+        }
+
         Intent queryIntent = getIntent();
         queryString = queryIntent.getStringExtra("query");
         userLocationString = queryIntent.getStringExtra("location");
+
+        deleteAllFromRealm(); //TODO - Modify/Delete later
 
         // initialize GoogleMaps
         initGMaps();
 
         // create GoogleApiClient
         createGoogleApi();
-        Log.v(TAG, "onCreate, pre findPlaces()");
         findPlaces(queryString, userLocationString, new Callback() {
             //TODO - Validate zero response from api
             @Override
@@ -146,38 +158,85 @@ public class MainActivity extends AppCompatActivity
 
                 Log.v(TAG, "ON RESPONSE: "+mPlaces.get(0).getmName() + ": " + mPlaces.get(0).getmLatitude() + ", " + mPlaces.get(0).getmLongitude());
 
-                for (Place place: mPlaces) {
-                    try {
-                        Log.v(TAG, "Save to DB loop in onResponse()");
-                        savePlaceInDatabase(place);
-                    } finally {
-//                        dropMarkers();
-//                        realm.close();
-                    }
+                //THREAD TEST
+                if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+                    Log.v(TAG, "onResponse() MAIN THREAD");
+                } else {
+                    Log.v(TAG, "onResponse() NOT MAIN THREAD");
                 }
 
+                for (Place place: mPlaces) {
+                        Log.v(TAG, "Save to DB loop in onResponse()");
+                        savePlaceInDatabase(place);
+
+                }
+                dropMarkers();
+//                realm.close();
             }
         });
 
     }
 
-    //TODO - save in db, drop markers, delete non selected markers from db
+    private void deleteAllFromRealm() {
+        Log.v(TAG, "DELEEEEEEETE!!!");
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                //THREAD TEST
+                if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+                    Log.v(TAG, "deleteAllFromRealm() MAIN THREAD");
+                } else {
+                    Log.v(TAG, "deleteAllFromRealm() NOT MAIN THREAD");
+                }
+                RealmResults<Place> deletedPlaces = realm.where(Place.class).findAll();
+                deletedPlaces.deleteAllFromRealm();
+            }
+        });
+    }
+
+    //TODO - drop markers, delete non selected markers from db
+//    List<Place> allPlaces;
+
     private void dropMarkers() {
-        List<Place> allPlaces = getPlaces();
-        Log.v(TAG, "dropMarkers() ->Length of allPlaces: " + String.valueOf(allPlaces.size()));
+        final double[] newLat = new double[1];
+        final double[] newLng = new double[1];
+        //THREAD TEST
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.v(TAG, "dropMarkers() MAIN THREAD");
+        } else {
+            Log.v(TAG, "dropMarkers() NOT MAIN THREAD");
+        }
 
-        double newLat;
-        double newLng;
-        Log.v(TAG, "pre-loop");
-        for (Place newPlace: allPlaces) {
-            Log.v(TAG, "in-loop");
-            Log.v(TAG, newPlace.getmName());
-            Log.v(TAG, "place object: " + String.valueOf(newPlace));
-            newLat = Double.valueOf(newPlace.getmLatitude());
-            newLng = Double.valueOf(newPlace.getmLongitude());
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                allPlaces = getPlaces();
+                Log.v(TAG, "dropMarkers() ->Length of allPlaces: " + String.valueOf(allPlaces.size()));
+                for (Place newPlace: allPlaces) {
+                    if (newPlace.getmName() == null) {
+                        continue;
+                    } else {
+                        Log.v(TAG, "in dropMarkers() loop");
+                        Log.v(TAG, newPlace.getmName());
+                        newLat[0] = Double.valueOf(newPlace.getmLatitude());
+                        newLng[0] = Double.valueOf(newPlace.getmLongitude());
 
-            LatLng newLatLng = new LatLng(newLat, newLng);
-            markerForGeofence(newLatLng);
+                        LatLng newLatLng = new LatLng(newLat[0], newLng[0]);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.v(TAG, "dropMarkers()->pre-markerForGeofence() call");
+                                //THREAD TEST
+//                        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+//                            Log.v(TAG, "dropMarkers() Runnable NOT IN MAIN THREAD");
+//                        } else {
+//                            Log.v(TAG, "dropMarkers() Runnable MAIN THREAD");
+//                        }
+                                markerForGeofence(newLatLng);
+                            }
+                        });
+                    }
+
 
 //            runOnUiThread(new Runnable() {
 //                @Override
@@ -187,7 +246,13 @@ public class MainActivity extends AppCompatActivity
 //                    realm.commitTransaction();
 //                }
 //            });
-        }
+                }
+
+            }
+        });
+
+
+
     }
 
     private void savePlaceInDatabase(Place place) {
@@ -195,7 +260,15 @@ public class MainActivity extends AppCompatActivity
         String lat = place.getmLatitude();
         String lng = place.getmLongitude();
         String name = place.getmName();
-        Log.v(TAG, "path: "+realm.getPath());
+
+//        Log.v(TAG, "path: "+realm.getPath());
+
+//        realm.beginTransaction();
+//        Place savePlace = realm.createObject(Place.class);
+//        savePlace.setmLatitude(lat);
+//        savePlace.setmLongitude(lng);
+//        savePlace.setmName(name);
+//        realm.commitTransaction();
 
         runOnUiThread(new Runnable() {
             @Override
@@ -203,6 +276,12 @@ public class MainActivity extends AppCompatActivity
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
+                        //THREAD TEST
+//                        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+//                            Log.v(TAG, "saveInDB() Runnable MAIN THREAD?");
+//                        } else {
+//                            Log.v(TAG, "saveInDB() Runnable NOT MAIN THREAD");
+//                        }
                         Place savePlace = realm.createObject(Place.class);
                         savePlace.setmLatitude(lat);
                         savePlace.setmLongitude(lng);
@@ -213,21 +292,25 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private List<Place> getPlaces() {
+    private ArrayList<Place> getPlaces() {
         Log.v(TAG, "getPlaces()");
-        List<Place> newPlaces = new ArrayList<>();
-        try {
-            realm = Realm.getDefaultInstance();
-            RealmResults<Place> newRealmPlaces = realm.where(Place.class).findAll();
-            Log.v(TAG, "Realm length of newRealmPlaces: " + String.valueOf(newRealmPlaces.size()));
-            Log.v(TAG, "Realm Object Test: " + String.valueOf(newRealmPlaces.get(0).getmName()));
-            newPlaces.addAll(realm.copyFromRealm(newRealmPlaces));
-        } finally {
-            if (realm != null) {
-                realm.close();
+        ArrayList<Place> newPlaces = new ArrayList<>();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                RealmResults<Place> newRealmPlaces = realm.where(Place.class).findAll();
+                Log.v(TAG, "Realm length of newRealmPlaces: " + String.valueOf(newRealmPlaces.size()));
+                Log.v(TAG, "Realm Object Test: " + String.valueOf(newRealmPlaces.get(0).getmName()));
+                newPlaces.addAll(realm.copyFromRealm(newRealmPlaces));
+                Log.v(TAG, "Realm length of newPlaces: " + String.valueOf(newRealmPlaces.size()));
             }
-        }
-        Log.v(TAG, "Object Test: " + newPlaces.get(0).toString());
+        });
+//        } finally {
+//            if (realm != null) {
+//                realm.close();
+//            }
+//        }
         return newPlaces;
     }
 
@@ -496,8 +579,9 @@ public class MainActivity extends AppCompatActivity
                 .title(title);
         if (map != null) {
             // Remove last geoFenceMarker
-            if (geoFenceMarker != null)
-                geoFenceMarker.remove();
+//            if (geoFenceMarker != null) {
+//                geoFenceMarker.remove();
+//            }
 
             geoFenceMarker = map.addMarker(markerOptions);
 
@@ -522,7 +606,7 @@ public class MainActivity extends AppCompatActivity
     //    private static final long GEO_DURATION = 60 * 60 * 1000; // 1 HR??
     private static final long GEO_DURATION = Geofence.NEVER_EXPIRE; // 1 HR??
     private static final long GEO_LOITER = 8 * 1000;
-    private static final String GEOFENCE_REQ_ID = "My Geofence";
+    private static final String GEOFENCE_REQ_ID = "Quiet Pocket";
     private static final float GEOFENCE_RADIUS = 16.0f; // in meters
 
     // Create a Geofence
