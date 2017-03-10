@@ -12,6 +12,5 @@ public class Constants {
     public static final String GOOGLE_PLACES_LOCATION = "location";
     public static final String GOOGLE_PLACES_RADIUS = "radius";
     public static final String GOOGLE_PLACES_KEY = "key";
-//    public static final String GOOGLE_PLACES_QUERY_PARAMS = "late night food";
 
 }
