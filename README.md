@@ -1,7 +1,9 @@
 # _Quiet Pocket_
 
 #### _12-22-2016_
-![project screenshot](app/src/main/res/drawable/screenshot.png)
+![project screenshot1](QP Home.png)
+![project screenshot2](QP Results.png)
+![project screenshot3](QP Selection.png)
 #### By _**Caleb Paul**_
 
 ## Description
@@ -24,16 +26,18 @@ _It is designed for folks who do not want their phone to ring at an inappropriat
 
 ## Known Bugs
 
-_App development is currently in process, not all features are implemented._
+_App development is currently in process, not all features are implemented.  Current build is "mostly" stable._
+_App not consistently maintaining multiple GeoFences._
 
 ## Specifications
 * On opening app:
     - App requests location permissions, if needed.
-    - App displays user's current location on a map.
-    - User can create or clear quiet zones by clicking on ActionBar menu.
+    - User inputs location for GeoFence markers.
 
-* On Create Quiet Zone:
-    - App creates a GeoFence at clicked location.
+* On Submission of User Input:
+    - App queries Google Places API.
+    - App generates markers for 1st 20 API location responses.
+    - User can make any marked location a 'quiet' GeoFence, or touch the map to drop a new marker.
     - App switches phone to vibrate when user enters GeoFence. 
     - App switches phone to audible ring when user exits GeoFence. 
         
@@ -43,7 +47,7 @@ _App development is currently in process, not all features are implemented._
 
 ## Support and contact details
 
-_Caleb Paul: @calebpaulmusic_
+_Caleb Paul: @calebpaulmusic OR calebpaul21@gmail.com_
 
 
 ## Technologies Used
