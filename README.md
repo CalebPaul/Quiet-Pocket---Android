@@ -1,9 +1,8 @@
 # _Quiet Pocket_
 
 #### _12-22-2016_
-![project screenshot1](/QPHome.png)
-![project screenshot2](QPResults.png)
-![project screenshot3](/QPSelection.png)
+![project screenshot](/screenshot_triple.jpg)
+
 #### By _**Caleb Paul**_
 
 ## Description
