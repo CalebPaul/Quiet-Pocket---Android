@@ -34,6 +34,7 @@
             android:textColor="@color/colorWhite"
             android:layout_weight="0.5"
             android:text="Long: " />
+
     </LinearLayout>
 
     <!--GoogleMap fragment-->
