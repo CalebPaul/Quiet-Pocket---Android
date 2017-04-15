@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     Log.v(TAG, "onResponse() NOT MAIN THREAD");
                 }
-
+                //TODO: Handle zero response from place api
                 for (Place place: mPlaces) {
                         Log.v(TAG, "Save to DB loop in onResponse()");
                         savePlaceInDatabase(place);
